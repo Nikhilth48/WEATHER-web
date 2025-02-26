@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weather Now</title>
+  <style>
+    /* CSS Variables for themes */
+    :root {
+      /* Light Mode Variables */
+      --bg-color-light: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      --text-color-light: #333;
+      --container-bg-light: rgba(255, 255, 255, 0.9);
+      --nav-bg-light: #0288d1;
+      --btn-bg-light: #0277bd;
+      --btn-bg-light-hover: #01579b;
+      
+      /* Dark Mode Variables */
+      --bg-color-dark: #000;
+      --text-color-dark: #fff;
+      --container-bg-dark: #111;
+      --nav-bg-dark: rgba(0, 0, 0, 0.7);
+      --btn-bg-dark: #ff7e5f;
+      --btn-bg-dark-hover: #eb6750;
+    }
+    
+    /* Dark Mode */
+    body.dark-mode {
+      background: var(--bg-color-dark);
+      color: var(--text-color-dark);
+    }
+    body.dark-mode .container {
+      background: var(--container-bg-dark);
+    }
+    body.dark-mode nav {
+      background: var(--nav-bg-dark);
+    }
+    
+    /* Light Mode */
+    body.light-mode {
+      background: var(--bg-color-light);
+      color: var(--text-color-light);
+    }
+    body.light-mode .container {
+      background: var(--container-bg-light);
+      color: var(--text-color-light);
+    }
+    body.light-mode nav {
+      background: var(--nav-bg-light);
+    }
+    
+    /* Base Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    /* Navigation Bar */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding: 10px 20px;
+      transition: background 0.3s;
+    }
+    nav a {
+      color: inherit;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.2em;
+      transition: color 0.3s;
+    }
+    nav a:hover {
+      color: #ff7e5f;
+    }
+    
+    /* Container Styles */
+    .container {
+      border-radius: 10px;
+      padding: 20px 30px;
+      max-width: 600px;
+      width: 90%;
+      margin: 20px auto;
+      text-align: center;
+      box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3);
+      transition: background 0.3s;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    select, input[type="text"] {
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+    }
+    .weather-result {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .weather-item {
+      margin: 10px 0;
+      font-size: 1.2em;
+    }
+    .weather-icon {
+      width: 100px;
+      height: auto;
+    }
+    /* Map container */
+    #map {
+      width: 100%;
+      height: 300px;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2em;
+      }
+      button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+      }
+      .weather-item {
+        font-size: 1em;
+      }
+    }
+    
+    /* Theme Toggle Button (fixed at bottom left) */
+    .toggle-theme {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+    }
+    
+    /* ---------- Fancy Button Style from Uiverse.io by kleenpulse ---------- */
+    .btn {
+      --border-color: linear-gradient(-45deg, #ffae00, #7e03aa, #00fffb);
+      --border-width: 0.125em;
+      --curve-size: 0.5em;
+      --blur: 30px;
+      --bg: #080312;
+      --color: #afffff;
+      color: var(--color);
+      cursor: pointer;
+      position: relative;
+      isolation: isolate;
+      display: inline-grid;
+      place-content: center;
+      padding: 0.5em 1.5em;
+      font-size: 17px;
+      border: 0;
+      text-transform: uppercase;
+      box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.6);
+      clip-path: polygon(
+        0% var(--curve-size),
+        var(--curve-size) 0,
+        100% 0,
+        100% calc(100% - var(--curve-size)),
+        calc(100% - var(--curve-size)) 100%,
+        0 100%
+      );
+      transition: color 250ms;
+    }
+    .btn::after,
+    .btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+    .btn::before {
+      background: var(--border-color);
+      background-size: 300% 300%;
+      animation: move-bg7234 5s ease infinite;
+      z-index: -2;
+    }
+    @keyframes move-bg7234 {
+      0% { background-position: 31% 0%; }
+      50% { background-position: 70% 100%; }
+      100% { background-position: 31% 0%; }
+    }
+    .btn::after {
+      background: var(--bg);
+      z-index: -1;
+      clip-path: polygon(
+        var(--border-width) calc(var(--curve-size) + var(--border-width) * 0.5),
+        calc(var(--curve-size) + var(--border-width) * 0.5) var(--border-width),
+        calc(100% - var(--border-width)) var(--border-width),
+        calc(100% - var(--border-width)) calc(100% - calc(var(--curve-size) + var(--border-width) * 0.5)),
+        calc(100% - calc(var(--curve-size) + var(--border-width) * 0.5)) var(--border-width),
+        var(--border-width) calc(100% - var(--border-width))
+      );
+      transition: clip-path 500ms;
+    }
+    .btn:where(:hover, :focus)::after {
+      clip-path: polygon(
+        calc(100% - var(--border-width)) calc(100% - calc(var(--curve-size) + var(--border-width) * 0.5)),
+        calc(100% - var(--border-width)) var(--border-width),
+        calc(100% - var(--border-width)) var(--border-width),
+        calc(100% - var(--border-width)) calc(100% - calc(var(--curve-size) + var(--border-width) * 0.5)),
+        calc(100% - calc(var(--curve-size) + var(--border-width) * 0.5)) var(--border-width),
+        calc(100% - calc(var(--curve-size) + var(--border-width) * 0.5)) var(--border-width)
+      );
+      transition: 200ms;
+    }
+    .btn:where(:hover, :focus) {
+      color: #fff;
+    }
+    /* ---------- End Fancy Button Style ---------- */
+    
+    /* Apply fancy button style to the toggle button */
+    .toggle-theme.btn {
+      /* The .btn styles will automatically apply */
+    }
+  </style>
+</head>
+<body class="dark-mode">
+  <!-- Navigation Bar -->
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">about</a>
+    <a href="login.html">login</a>
+
+  </nav>
+
+  <!-- Weather Content -->
+  <div class="container">
+    <h1>Weather Now</h1>
+    <!-- Country Dropdown -->
+    <div class="input-group">
+      <label for="countrySelect">Select Country:</label>
+      <select id="countrySelect"></select>
+    </div>
+    <!-- Single Text Input for City and State -->
+    <div class="input-group">
+      <label for="locationInput">Enter City and State:</label>
+      <input type="text" id="locationInput" placeholder="e.g., Paris, Île-de-France" />
+    </div>
+    <button id="getWeatherBtn">Get Weather</button>
+    <div id="weatherResult" class="weather-result" style="display: none;"></div>
+    <!-- Map Container -->
+    <div id="map"></div>
+  </div>
+
+  <!-- Theme Toggle Button (bottom left) -->
+  <button class="toggle-theme btn" id="toggleThemeBtn">Switch to Day Mode</button>
+
+  <script>
+    const apiKey = "c4c0374bea5443d8a8a220222252302";
+    const countrySelect = document.getElementById("countrySelect");
+    const locationInput = document.getElementById("locationInput");
+    const getWeatherBtn = document.getElementById("getWeatherBtn");
+    const weatherResult = document.getElementById("weatherResult");
+    const toggleThemeBtn = document.getElementById("toggleThemeBtn");
+
+    // Populate country dropdown
+    const countries = [
+      "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan",
+      "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi",
+      "Côte d'Ivoire", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Congo-Brazzaville)", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia (Czech Republic)",
+      "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+      "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia",
+      "Fiji", "Finland", "France",
+      "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana",
+      "Haiti", "Holy See", "Honduras", "Hungary",
+      "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy",
+      "Jamaica", "Japan", "Jordan",
+      "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan",
+      "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
+      "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique",
+      "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway",
+      "Oman",
+      "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal",
+      "Qatar",
+      "Romania", "Russia", "Rwanda",
+      "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+      "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu",
+      "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States of America", "Uruguay", "Uzbekistan",
+      "Vanuatu", "Venezuela", "Vietnam",
+      "Yemen",
+      "Zambia", "Zimbabwe"
+    ];
+    countries.forEach(country => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.textContent = country;
+      countrySelect.appendChild(option);
+    });
+
+    // Theme toggle functionality using fancy button style
+    toggleThemeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("light-mode");
+      document.body.classList.toggle("dark-mode");
+      if (document.body.classList.contains("light-mode")) {
+        toggleThemeBtn.textContent = "Switch to Night Mode";
+      } else {
+        toggleThemeBtn.textContent = "Switch to Day Mode";
+      }
+    });
+    toggleThemeBtn.textContent = "Switch to Day Mode";
+
+    // When "Get Weather" button is clicked
+    getWeatherBtn.addEventListener("click", () => {
+      const cityAndState = locationInput.value.trim();
+      const country = countrySelect.value;
+      if (!cityAndState) {
+        alert("Please enter a city and state!");
+        return;
+      }
+      const query = `${cityAndState}, ${country}`;
+      fetchWeather(query);
+    });
+
+    async function fetchWeather(query) {
+      weatherResult.style.display = "block";
+      weatherResult.innerHTML = "<p>Loading weather data...</p>";
+      try {
+        const currentUrl = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(query)}`;
+        const currentResponse = await fetch(currentUrl);
+        console.log("RES: ", currentResponse)
+        if (!currentResponse.ok) {
+          throw new Error("Error fetching current weather data.");
+        }
+        const currentData = await currentResponse.json();
+
+        const localDate = new Date(currentData.location.localtime).toISOString().split("T")[0];
+        const astronomyUrl = `http://api.weatherapi.com/v1/astronomy.json?key=${apiKey}&q=${encodeURIComponent(query)}&dt=${localDate}`;
+        const astronomyResponse = await fetch(astronomyUrl);
+        if (!astronomyResponse.ok) {
+          throw new Error("Error fetching astronomy data.");
+        }
+        const astronomyData = await astronomyResponse.json();
+
+        displayWeather(currentData, astronomyData);
+        updateMap(currentData.location.lat, currentData.location.lon, currentData.current.wind_degree, currentData.current.wind_kph);
+      } catch (error) {
+        weatherResult.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+
+    function displayWeather(currentData, astronomyData) {
+      const { location, current } = currentData;
+      const { astronomy } = astronomyData;
+      const sunset = astronomy.astro.sunset;
+      weatherResult.innerHTML = `
+        <div class="weather-item"><strong>Location:</strong> ${location.name}, ${location.region}, ${location.country}</div>
+        <div class="weather-item"><strong>Local Time:</strong> ${location.localtime}</div>
+        <div class="weather-item">
+          <strong>Condition:</strong> ${current.condition.text}<br>
+          ${current.condition.icon ? `<img src="https:${current.condition.icon}" alt="Weather Icon" class="weather-icon">` : ""}
+        </div>
+        <div class="weather-item"><strong>Temperature:</strong> ${current.temp_c} °C</div>
+        <div class="weather-item"><strong>Wind Speed:</strong> ${current.wind_kph} kph</div>
+        <div class="weather-item"><strong>Humidity:</strong> ${current.humidity}%</div>
+        <div class="weather-item"><strong>Sunset:</strong> ${sunset}</div>
+      `;
+    }
+
+    // Google Maps integration
+    let map, marker, windMarker;
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 0, lng: 0 },
+        zoom: 2,
+      });
+      marker = new google.maps.Marker({
+        position: { lat: 0, lng: 0 },
+        map: map,
+      });
+      windMarker = new google.maps.Marker({
+        position: { lat: 0, lng: 0 },
+        map: map,
+        icon: {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          fillColor: "yellow",
+          fillOpacity: 0.8,
+          strokeColor: "gold",
+          strokeWeight: 2,
+          scale: 1,
+          rotation: 0
+        }
+      });
+    }
+    function updateMap(lat, lng, windDegree, windSpeed) {
+      const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
+      map.setCenter(position);
+      map.setZoom(8);
+      marker.setPosition(position);
+      windMarker.setPosition(position);
+      windMarker.setIcon({
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        fillColor: "yellow",
+        fillOpacity: 0.8,
+        strokeColor: "gold",
+        strokeWeight: 2,
+        scale: windSpeed / 5,
+        rotation: windDegree
+      });
+    }
+  </script>
+  <!-- Load Google Maps API -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHsSMsmd8wvaV8QH5u2MctAUXCmtQ-aRs&callback=initMap"></script>
+</body>
+</html>
